@@ -2,7 +2,7 @@
 //error_reporting(E_STRICT);
 //ini_set('display_errors','On');
 
-//define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/log.txt");
+
 
 define('CATALOG_IBLOCK_ID', 2);
 define('STORES_IBLOCK_ID', 4);
@@ -133,7 +133,7 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 															//for example if select from local PC /home/bitrix/www/upload/tmp/BXTEMP-2019-03-02/03/bxu/main/b3bb5d25665966cb038ca38a5ff65b25/file1551441900551/default
 	$path_parts = pathinfo($strSavePath);					//array with dirname, basename, extension and filename
 
-	if (strpos($path_parts['dirname'], 'upload') !== false)
+	if ((strpos($path_parts['dirname'], 'upload') !== false) && (strpos($path_parts['dirname'], 'tmp') === false))
 	{
 		$position = strpos($path_parts['dirname'], 'upload') . PHP_EOL;  //==17 if path start with /home/bitrix/www/upload
 		$message = print_r("найдено", true) . PHP_EOL;
@@ -141,28 +141,23 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $position, FILE_APPEND);
 		$resultPath = substr($path_parts['dirname'], intval($position) + 6);
 		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $resultPath, FILE_APPEND);
-
-
 	} 
 	else 
 	{
-		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", print_r("не найдено", true));
+		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", print_r("не найдено", true), FILE_APPEND);
+		return false;
 	}
 
-/*
-	$arFile["SUBDIR"] = dirname($strSavePath); 
-	$arFile["FILE_NAME"] = $strFileName;
+	$resultPathWithName = $resultPath . "/" . $path_parts['basename'];
+	$arFile["SUBDIR"] = $resultPath; 
+	$arFile["FILE_NAME"] = $path_parts['basename'];  // or can be used filename instead basename
 
-	//$strDirName = $_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/".$strSavePath."/";
-	$strDirName = $_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/";
-	$strDbFileNameX = $strDirName.$strFileName;
-	$strPhysicalFileNameX = $io->GetPhysicalName($strDbFileNameX);
+	CheckDirPath($resultPath); // creating new path if not exist
 
-	CheckDirPath($strDirName);
-
+	//not needed, but let's stay here in case if $arFile have field with content
 	if(is_set($arFile, "content"))
 	{
-		$f = fopen($strPhysicalFileNameX, "w");
+		$f = fopen($resultPathWithName, "w");
 		if(!$f)
 			return false;
 		if(fwrite($f, $arFile["content"]) === false)
@@ -170,18 +165,20 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 		fclose($f);
 	}
 	elseif(
-		!copy($arFile["tmp_name"], $strPhysicalFileNameX)
-		&& !move_uploaded_file($arFile["tmp_name"], $strPhysicalFileNameX)
-	)
+		!copy($arFile["tmp_name"], $resultPathWithName)
+		&& !move_uploaded_file($arFile["tmp_name"], $resultPathWithName)
+	) //move_uploaded_file return true only if file was uploaded throw PHP
 	{
 		CFile::DoDelete($arFile["old_file"]);
 		return false;
 	}
 
 	if(isset($arFile["old_file"]))
+	{
 		CFile::DoDelete($arFile["old_file"]);
+	}
 
-	@chmod($strPhysicalFileNameX, BX_FILE_PERMISSIONS);
+	@chmod($resultPathWithName, BX_FILE_PERMISSIONS);
 
 	//flash is not an image
 	$flashEnabled = !CFile::IsImage($arFile["ORIGINAL_NAME"], $arFile["type"]);
