@@ -201,7 +201,7 @@ class CAllFile
 		if(!$bExternalStorage)
 		{
 			//$upload_dir = COption::GetOptionString("main", "upload_dir", "upload");
-			$upload_dir = "/news/";
+			//$upload_dir = "/news/";
 			$io = CBXVirtualIo::GetInstance();
 			if($bForceMD5 != true && COption::GetOptionString("main", "save_original_file_name", "N") == "Y")
 			{
@@ -213,7 +213,8 @@ class CAllFile
 					{
 						$dir_add = substr(md5(uniqid("", true)), 0, 3);
 						//if(!$io->FileExists($_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/".$strSavePath."/".$dir_add."/".$strFileName))
-						if(!$io->FileExists($_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/".$strFileName))
+						//if(!$io->FileExists($_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/".$strFileName))
+						if(!$io->FileExists($_SERVER["DOCUMENT_ROOT"]."/".$strFileName))
 						{
 							break;
 						}
@@ -224,7 +225,8 @@ class CAllFile
 							{
 								$dir_add = substr(md5(mt_rand()), 0, 3)."/".substr(md5(mt_rand()), 0, 3);
 								//if(!$io->FileExists($_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/".$strSavePath."/".$dir_add."/".$strFileName))
-								if(!$io->FileExists($_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/".$strFileName))
+								//if(!$io->FileExists($_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/".$strFileName))
+								if(!$io->FileExists($_SERVER["DOCUMENT_ROOT"]."/".$strFileName))	
 								{
 									break;
 								}
@@ -264,7 +266,8 @@ class CAllFile
 					}
 
 					//if(!$io->FileExists($_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/".$strSavePath."/".$strFileName))
-					if(!$io->FileExists($_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/".$strFileName))
+					//if(!$io->FileExists($_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/".$strFileName))
+					if(!$io->FileExists($_SERVER["DOCUMENT_ROOT"]."/".$strFileName))	
 						break;
 
 					//try the new name
@@ -275,7 +278,8 @@ class CAllFile
 			$arFile["SUBDIR"] = $strSavePath;
 			$arFile["FILE_NAME"] = $strFileName;
 			//$strDirName = $_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/".$strSavePath."/";
-			$strDirName = $_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/";
+			//$strDirName = $_SERVER["DOCUMENT_ROOT"]."/".$upload_dir."/";
+			$strDirName = $_SERVER["DOCUMENT_ROOT"]."/";
 			$strDbFileNameX = $strDirName.$strFileName;
 			$strPhysicalFileNameX = $io->GetPhysicalName($strDbFileNameX);
 
@@ -601,10 +605,12 @@ class CAllFile
 		{
 			//if($upload_dir === false)
 				//$upload_dir = COption::GetOptionString("main", "upload_dir", "upload");
-			$upload_dir = "/news/";
+			//$upload_dir = "/news/";
+			$upload_dir = "/";
 
 			//$src = "/".$upload_dir."/".$arFile["SUBDIR"]."/".$arFile["FILE_NAME"];
-			$src = "/".$upload_dir."/".$arFile["FILE_NAME"];
+			//$src = "/".$upload_dir."/".$arFile["FILE_NAME"];
+			$src = "/".$arFile["FILE_NAME"];
 
 			$src = str_replace("//", "/", $src);
 			if(defined("BX_IMG_SERVER"))
@@ -1614,12 +1620,12 @@ function ImgShw(ID, width, height, alt)
 		$arSize["width"] = intval($arSize["width"]);
 		$arSize["height"] = intval($arSize["height"]);
 
-		//$uploadDirName = COption::GetOptionString("main", "upload_dir", "upload");
-		$uploadDirName = "/news/";
+		$uploadDirName = COption::GetOptionString("main", "upload_dir", "upload");
+		//$uploadDirName = "/news/";
 		//print_r($uploadDirName);
 
-		//$imageFile = "/".$uploadDirName."/".$file["SUBDIR"]."/".$file["FILE_NAME"];
-		$imageFile = "/".$uploadDirName."/".$file["FILE_NAME"];
+		$imageFile = "/".$uploadDirName."/".$file["SUBDIR"]."/".$file["FILE_NAME"];
+		//$imageFile = "/".$uploadDirName."/".$file["FILE_NAME"];
 
 		$arImageSize = false;
 		$bFilters = is_array($arFilters) && !empty($arFilters);
@@ -1652,7 +1658,7 @@ function ImgShw(ID, width, height, alt)
 
 		$io = CBXVirtualIo::GetInstance();
 		$cacheImageFile = "/".$uploadDirName."/resize_cache/".$file["SUBDIR"]."/".$arSize["width"]."_".$arSize["height"]."_".$resizeType.(is_array($arFilters)? md5(serialize($arFilters)): "")."/".$file["FILE_NAME"];
-		//$cacheImageFile = "/"."upload/resize_cache/".$file["SUBDIR"]."/".$arSize["width"]."_".$arSize["height"]."_".$resizeType.(is_array($arFilters)? md5(serialize($arFilters)): "")."/".$file["FILE_NAME"];
+		//$cacheImageFile = "/"."resize_cache/".$arSize["width"]."_".$arSize["height"]."_".$resizeType.(is_array($arFilters)? md5(serialize($arFilters)): "")."/".$file["FILE_NAME"];
 
 		$cacheImageFileCheck = $cacheImageFile;
 		if ($file["CONTENT_TYPE"] == "image/bmp")
@@ -1700,6 +1706,7 @@ function ImgShw(ID, width, height, alt)
 						break;
 				}
 
+				
 				if ($bNeedResize && CFile::ResizeImageFile($sourceImageFile, $cacheImageFileTmp, $arSize, $resizeType, array(), $jpgQuality, $arFilters))
 				{
 					$cacheImageFile = substr($cacheImageFileTmp, strlen($_SERVER["DOCUMENT_ROOT"]));
@@ -1746,6 +1753,7 @@ function ImgShw(ID, width, height, alt)
 		}
 
 		$cache[$cache_id] = array(
+			//"src" => "/warranty-800px.jpg";
 			"src" => $cacheImageFileCheck,
 			"width" => intval($arImageSize[0]),
 			"height" => intval($arImageSize[1]),
