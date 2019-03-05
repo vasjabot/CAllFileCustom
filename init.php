@@ -81,50 +81,31 @@ class CBDPEpilogHooks
 AddEventHandler("main",'OnFileSave','OnFileSave');
 function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $bSkipExt = false, $dirAdd = '')
 {
-	//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", print_r($arFile, true), FILE_APPEND);
-
 	//Working with path
 	$strSavePath = $arFile['tmp_name'];						//original path from where is uploading 
 															//for example if select from local PC /home/bitrix/www/upload/tmp/BXTEMP-2019-03-02/03/bxu/main/b3bb5d25665966cb038ca38a5ff65b25/file1551441900551/default
 	$path_parts = pathinfo($strSavePath);					//array with dirname, basename, extension and filename
 
-	//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $path_parts['dirname'], FILE_APPEND);
-	//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $path_parts['basename'], FILE_APPEND);
-
-	//if ((strpos($path_parts['dirname'], 'upload') !== false) && (strpos($path_parts['dirname'], 'tmp') !== false))
 	if (strpos($path_parts['dirname'], '/home/bitrix/www/upload/medialibrary/') !== false)
 	{
-		//$position = strpos($path_parts['dirname'], 'upload') . PHP_EOL;  //==17 if path start with /home/bitrix/www/upload
-		//$message = print_r("найдено", true) . PHP_EOL;
-		//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $message, FILE_APPEND);
-		//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $position, FILE_APPEND);
-
-
-
-
 		$filename_with_points_and_extension = $path_parts['basename'];
 		$array_filename = explode(".", $filename_with_points_and_extension);
 		$count_array_filename = count($array_filename);
 		while($count_array_filename--)
 		{
-			file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $count_array_filename. PHP_EOL, FILE_APPEND);
-			//$pos = strpos($filename_with_points_and_extension, ".");
-			//$fn = substr($filename_with_points_and_extension, 0, $pos);
+			//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $count_array_filename. PHP_EOL, FILE_APPEND);
 		}
 
 		$count_array_filename = count($array_filename);
 
-		//$clear_filename_with_extension = $array_filename[$count_array_filename -1] . $array_filename[$count_array_filename];
-		//$clear_filename_with_extension =  $array_filename[$count_array_filename-2] . $array_filename[$count_array_filename-1];
-
 		$clear_filename_without_extension =  $array_filename[$count_array_filename-2];
-		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $clear_filename_without_extension. PHP_EOL, FILE_APPEND);
+		//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $clear_filename_without_extension. PHP_EOL, FILE_APPEND);
 
 		$extension =  $array_filename[$count_array_filename-1];
-		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $extension. PHP_EOL, FILE_APPEND);
+		//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $extension. PHP_EOL, FILE_APPEND);
 
 		$filename_with_extension =  $clear_filename_without_extension . "." . $extension;
-		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $filename_with_extension. PHP_EOL, FILE_APPEND);
+		//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $filename_with_extension. PHP_EOL, FILE_APPEND);
 
 		$i = -1;
 		$resultPath = '';
@@ -137,15 +118,11 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 				break;
 			}
 			$resultPath .= $item_Path . '/';
-			file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $resultPath. PHP_EOL, FILE_APPEND);
-			file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $i. PHP_EOL, FILE_APPEND);
+			//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $resultPath. PHP_EOL, FILE_APPEND);
+			//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $i. PHP_EOL, FILE_APPEND);
 		}
 
-		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $resultPath. PHP_EOL, FILE_APPEND);
-
-
-		//$resultPath = substr($path_parts['dirname'], intval($position) + 10);
-		//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $resultPath, FILE_APPEND);
+		//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $resultPath. PHP_EOL, FILE_APPEND);
 	} 
 	else 
 	{
@@ -157,16 +134,10 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 	$arFile["SUBDIR"] = $resultPath; 
 	$arFile["FILE_NAME"] = $filename_with_extension;  
 
-	//Through io path is the same
-	$io = CBXVirtualIo::GetInstance();
-	$resultPathWithName = $io->GetPhysicalName($resultPathWithName);
-	file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", "resultPathWithName is: " . $resultPathWithName, FILE_APPEND);
-
 	CheckDirPath("/home/bitrix/www/upload/" . $resultPath); // creating new path if not exist
 
 	$result_full_path = "/home/bitrix/www/upload/" . $resultPathWithName;
-
-	file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", "result_full_path is: " . $result_full_path, FILE_APPEND);
+	//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", "result_full_path is: " . $result_full_path, FILE_APPEND);
 
 	//not needed, but let's stay here in case if $arFile have field with content
 	if(is_set($arFile, "content"))
@@ -179,7 +150,7 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 		fclose($f);
 	}
 	elseif(
-		!copy($arFile["tmp_name"], "/home/bitrix/www/upload/" . $resultPathWithName)
+		!copy($arFile["tmp_name"], $result_full_path)
 		&& !move_uploaded_file($arFile["tmp_name"], $resultPathWithName)
 	) //move_uploaded_file return true only if file was uploaded throw PHP
 	{
@@ -200,7 +171,7 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 	//flash is not an image
 	$flashEnabled = !CFile::IsImage($arFile["ORIGINAL_NAME"], $arFile["type"]);
 
-	$imgArray = CFile::GetImageSize("/home/bitrix/www/upload/" . $resultPathWithName, false, $flashEnabled);
+	$imgArray = CFile::GetImageSize($result_full_path, false, $flashEnabled);
 
 	if(is_array($imgArray))
 	{
@@ -209,7 +180,7 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 
 		if($imgArray[2] == IMAGETYPE_JPEG)
 		{
-			$exifData = CFile::ExtractImageExif("/home/bitrix/www/upload/" . $resultPathWithName);
+			$exifData = CFile::ExtractImageExif($result_full_path);
 			if ($exifData  && isset($exifData['Orientation']))
 			{
 				//swap width and height
@@ -219,7 +190,7 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 					$arFile["HEIGHT"] = $imgArray[0];
 				}
 
-				$properlyOriented = CFile::ImageHandleOrientation($exifData['Orientation'], "/home/bitrix/www/upload/" . $resultPathWithName);
+				$properlyOriented = CFile::ImageHandleOrientation($exifData['Orientation'], $result_full_path);
 				if ($properlyOriented)
 				{
 					$jpgQuality = intval(COption::GetOptionString('main', 'image_resize_quality', '95'));
@@ -230,7 +201,7 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 					clearstatcache(true, $strPhysicalFileNameX);
 				}
 
-				$arFile['size'] = filesize("/home/bitrix/www/upload/" . $resultPathWithName);
+				$arFile['size'] = filesize($result_full_path);
 			}
 		}
 	}
