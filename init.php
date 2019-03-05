@@ -1,8 +1,4 @@
 <?
-//error_reporting(E_STRICT);
-//ini_set('display_errors','On');
-
-
 
 define('CATALOG_IBLOCK_ID', 2);
 define('STORES_IBLOCK_ID', 4);
@@ -82,77 +78,95 @@ class CBDPEpilogHooks
 }
 
 
-AddEventHandler("main",'OnBeforeResizeImage','OnBeforeResizeImageFunc');
-function OnBeforeResizeImageFunc($arFile, $arResizeParams, &$callbackData, &$bNeedResize, &$sourceImageFile, &$cacheImageFileTmp)
-{
-   ?><!--<pre><?print_r($arFile);?></pre><?
-	?><pre><?print_r($arResizeParams);?></pre><?
-	?><pre><?print_r($callbackData);?></pre><?
-	?><pre><?print_r($bNeedResize);?></pre><?
-	?><pre><?print_r($sourceImageFile);?></pre><?
-	?><pre><?print_r($cacheImageFileTmp);?></pre>--><?
-	//exit();
-}
-
-
-AddEventHandler("main",'OnAfterResizeImage','OnAfterResizeImageFunc');
-function OnAfterResizeImageFunc($arFile, $arResizeParams, &$callbackData, &$cacheImageFile, &$cacheImageFileTmp, &$arImageSize)
-{
-	?><script>
-	//alert('OnAfterResizeImageFunc');
-	//document.location.href='/personal/cart/';
-	</script><?
-
-   ?><!--<pre><?print_r($arFile);?></pre><?
-	?><pre><?print_r($arResizeParams);?></pre><?
-	?><pre><?print_r($callbackData);?></pre><?
-	?><pre><?
-	//print_r($cacheImageFile);
-	//echo nl2br("\r\n");
-	//$cacheImageFile = '/' . $arFile['FILE_NAME'];
-	//print_r($cacheImageFile);
-
-?></pre><?
-	?><pre><?print_r($cacheImageFileTmp);?></pre><?
-	?><pre><?print_r($arImageSize);?></pre>--><?
-	//exit();
-}
-
-
 AddEventHandler("main",'OnFileSave','OnFileSave');
 function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $bSkipExt = false, $dirAdd = '')
 {
-
-	file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", print_r($arFile, true), FILE_APPEND);
-
-	//$upload_dir = "/upload/";
-	$upload_dir = "";
+	//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", print_r($arFile, true), FILE_APPEND);
 
 	//Working with path
 	$strSavePath = $arFile['tmp_name'];						//original path from where is uploading 
 															//for example if select from local PC /home/bitrix/www/upload/tmp/BXTEMP-2019-03-02/03/bxu/main/b3bb5d25665966cb038ca38a5ff65b25/file1551441900551/default
 	$path_parts = pathinfo($strSavePath);					//array with dirname, basename, extension and filename
 
-	if ((strpos($path_parts['dirname'], 'upload') !== false) && (strpos($path_parts['dirname'], 'tmp') === false))
+	//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $path_parts['dirname'], FILE_APPEND);
+	//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $path_parts['basename'], FILE_APPEND);
+
+	//if ((strpos($path_parts['dirname'], 'upload') !== false) && (strpos($path_parts['dirname'], 'tmp') !== false))
+	if (strpos($path_parts['dirname'], '/home/bitrix/www/upload/medialibrary/') !== false)
 	{
-		$position = strpos($path_parts['dirname'], 'upload') . PHP_EOL;  //==17 if path start with /home/bitrix/www/upload
-		$message = print_r("найдено", true) . PHP_EOL;
-		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $message, FILE_APPEND);
-		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $position, FILE_APPEND);
-		$resultPath = substr($path_parts['dirname'], intval($position) + 6);
-		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $resultPath, FILE_APPEND);
+		//$position = strpos($path_parts['dirname'], 'upload') . PHP_EOL;  //==17 if path start with /home/bitrix/www/upload
+		//$message = print_r("найдено", true) . PHP_EOL;
+		//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $message, FILE_APPEND);
+		//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $position, FILE_APPEND);
+
+
+
+
+		$filename_with_points_and_extension = $path_parts['basename'];
+		$array_filename = explode(".", $filename_with_points_and_extension);
+		$count_array_filename = count($array_filename);
+		while($count_array_filename--)
+		{
+			file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $count_array_filename. PHP_EOL, FILE_APPEND);
+			//$pos = strpos($filename_with_points_and_extension, ".");
+			//$fn = substr($filename_with_points_and_extension, 0, $pos);
+		}
+
+		$count_array_filename = count($array_filename);
+
+		//$clear_filename_with_extension = $array_filename[$count_array_filename -1] . $array_filename[$count_array_filename];
+		//$clear_filename_with_extension =  $array_filename[$count_array_filename-2] . $array_filename[$count_array_filename-1];
+
+		$clear_filename_without_extension =  $array_filename[$count_array_filename-2];
+		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $clear_filename_without_extension. PHP_EOL, FILE_APPEND);
+
+		$extension =  $array_filename[$count_array_filename-1];
+		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $extension. PHP_EOL, FILE_APPEND);
+
+		$filename_with_extension =  $clear_filename_without_extension . "." . $extension;
+		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $filename_with_extension. PHP_EOL, FILE_APPEND);
+
+		$i = -1;
+		$resultPath = '';
+		while ($i++ != $count_array_filename-1)
+		{			
+			$item_Path = $array_filename[$i];
+			if ($item_Path == $clear_filename_without_extension)
+			{
+				//$resultPath .= $filename_with_extension;
+				break;
+			}
+			$resultPath .= $item_Path . '/';
+			file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $resultPath. PHP_EOL, FILE_APPEND);
+			file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $i. PHP_EOL, FILE_APPEND);
+		}
+
+		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $resultPath. PHP_EOL, FILE_APPEND);
+
+
+		//$resultPath = substr($path_parts['dirname'], intval($position) + 10);
+		//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $resultPath, FILE_APPEND);
 	} 
 	else 
 	{
-		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", print_r("не найдено", true), FILE_APPEND);
+		//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", print_r("не найдено", true), FILE_APPEND);
 		return false;
 	}
 
-	$resultPathWithName = $resultPath . "/" . $path_parts['basename'];
+	$resultPathWithName = $resultPath  . $filename_with_extension;
 	$arFile["SUBDIR"] = $resultPath; 
-	$arFile["FILE_NAME"] = $path_parts['basename'];  // or can be used filename instead basename
+	$arFile["FILE_NAME"] = $filename_with_extension;  
 
-	CheckDirPath($resultPath); // creating new path if not exist
+	//Through io path is the same
+	$io = CBXVirtualIo::GetInstance();
+	$resultPathWithName = $io->GetPhysicalName($resultPathWithName);
+	file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", "resultPathWithName is: " . $resultPathWithName, FILE_APPEND);
+
+	CheckDirPath("/home/bitrix/www/upload/" . $resultPath); // creating new path if not exist
+
+	$result_full_path = "/home/bitrix/www/upload/" . $resultPathWithName;
+
+	file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", "result_full_path is: " . $result_full_path, FILE_APPEND);
 
 	//not needed, but let's stay here in case if $arFile have field with content
 	if(is_set($arFile, "content"))
@@ -165,25 +179,28 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 		fclose($f);
 	}
 	elseif(
-		!copy($arFile["tmp_name"], $resultPathWithName)
+		!copy($arFile["tmp_name"], "/home/bitrix/www/upload/" . $resultPathWithName)
 		&& !move_uploaded_file($arFile["tmp_name"], $resultPathWithName)
 	) //move_uploaded_file return true only if file was uploaded throw PHP
 	{
 		CFile::DoDelete($arFile["old_file"]);
 		return false;
+		//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", "WAS NOT return FALSE", FILE_APPEND);
 	}
 
 	if(isset($arFile["old_file"]))
 	{
 		CFile::DoDelete($arFile["old_file"]);
 	}
-
+	//define("BX_FILE_PERMISSIONS", 0664);
+	//define("BX_FILE_PERMISSIONS_NEW", 0777);
 	@chmod($resultPathWithName, BX_FILE_PERMISSIONS);
+	//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", BX_FILE_PERMISSIONS, FILE_APPEND);
 
 	//flash is not an image
 	$flashEnabled = !CFile::IsImage($arFile["ORIGINAL_NAME"], $arFile["type"]);
 
-	$imgArray = CFile::GetImageSize($strDbFileNameX, false, $flashEnabled);
+	$imgArray = CFile::GetImageSize("/home/bitrix/www/upload/" . $resultPathWithName, false, $flashEnabled);
 
 	if(is_array($imgArray))
 	{
@@ -192,7 +209,7 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 
 		if($imgArray[2] == IMAGETYPE_JPEG)
 		{
-			$exifData = CFile::ExtractImageExif($strPhysicalFileNameX);
+			$exifData = CFile::ExtractImageExif("/home/bitrix/www/upload/" . $resultPathWithName);
 			if ($exifData  && isset($exifData['Orientation']))
 			{
 				//swap width and height
@@ -202,7 +219,7 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 					$arFile["HEIGHT"] = $imgArray[0];
 				}
 
-				$properlyOriented = CFile::ImageHandleOrientation($exifData['Orientation'], $io->GetPhysicalName($strDbFileNameX));
+				$properlyOriented = CFile::ImageHandleOrientation($exifData['Orientation'], "/home/bitrix/www/upload/" . $resultPathWithName);
 				if ($properlyOriented)
 				{
 					$jpgQuality = intval(COption::GetOptionString('main', 'image_resize_quality', '95'));
@@ -213,7 +230,7 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 					clearstatcache(true, $strPhysicalFileNameX);
 				}
 
-				$arFile['size'] = filesize($strPhysicalFileNameX);
+				$arFile['size'] = filesize("/home/bitrix/www/upload/" . $resultPathWithName);
 			}
 		}
 	}
@@ -244,7 +261,7 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 	}
 	// QUOTA 
 
-	$NEW_IMAGE_ID = CFile::DoInsert(array(
+		$NEW_IMAGE_ID = CFile::DoInsert(array(
 		"HEIGHT" => $arFile["HEIGHT"],
 		"WIDTH" => $arFile["WIDTH"],
 		"FILE_SIZE" => $arFile["size"],
@@ -259,205 +276,10 @@ function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $b
 	));
 
 	CFile::CleanCache($NEW_IMAGE_ID);
-*/
-
 
 return true;
 
-	//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", print_r($strFileName, true));		//just name
-
-	//file_put_contents($_SERVER["DOCUMENT_ROOT"]."/log.txt", $arFile);
-
-	//echo "<pre>";
-	//echo mydump($USER);
-	//echo "</pre>";
-
-	//print_r(Debug::getTimeLabels());
-	//print_r(Debug::writeToFile($_SERVER["DOCUMENT_ROOT"]."/log.txt"));
-
-	//AddMessage2Log("Произвольный текст сообщения", "init");
-
-	//ShowMessage("Ошибка! Вы забыли заполнить обязательные поля!");
-	//$APPLICATION->SetTitle("О компании");
-	//throw new CTaskAssertException();
-	//$e = new CAdminException();
-
-	//$APPLICATION->throwException($e);
-
-	/*$arNewFile = CIBlock::ResizePicture($arFile, array("WIDTH" => 20, "HEIGHT" => 20, "METHOD" => "resample"));
-   if(is_array($arNewFile))
-      $arFile = $arNewFile;
-   else
-      $APPLICATION->throwException("Ошибка масштабирования изображения в свойстве \"Файлы\":".$arNewFile);
-	*/
 }
-
-
-
-
-
-
-
-/*public static function OnFileSave(&$arFile, $strFileName, $strSavePath, $bForceMD5 = false, $bSkipExt = false, $dirAdd = '')
-{
-		if (!$arFile["tmp_name"] && !array_key_exists("content", $arFile))
-			return false;
-
-		if (array_key_exists("bucket", $arFile))
-			$bucket = $arFile["bucket"];
-		else
-			$bucket = CCloudStorage::FindBucketForFile($arFile, $strFileName);
-
-		if (!is_object($bucket))
-			return false;
-
-		if (!$bucket->Init())
-			return false;
-
-		$copySize = false;
-		$subDir = "";
-		$filePath = "";
-
-		if (array_key_exists("content", $arFile))
-		{
-			$arFile["tmp_name"] = CTempFile::GetFileName($arFile["name"]);
-			CheckDirPath($arFile["tmp_name"]);
-			$fp = fopen($arFile["tmp_name"], "ab");
-			if ($fp)
-			{
-				fwrite($fp, $arFile["content"]);
-				fclose($fp);
-			}
-		}
-
-		if (array_key_exists("bucket", $arFile))
-		{
-			$newName = bx_basename($arFile["tmp_name"]);
-
-			$prefix = $bucket->GetFileSRC("/");
-			$subDir = substr($arFile["tmp_name"], strlen($prefix));
-			$subDir = substr($subDir, 0, -strlen($newName) - 1);
-		}
-		else
-		{
-			if (
-				$bForceMD5 != true
-				&& COption::GetOptionString("main", "save_original_file_name", "N") == "Y"
-			)
-			{
-				if (COption::GetOptionString("main", "convert_original_file_name", "Y") == "Y")
-					$newName = CCloudStorage::translit($strFileName);
-				else
-					$newName = $strFileName;
-			}
-			else
-			{
-				$strFileExt = ($bSkipExt == true? '': strrchr($strFileName, "."));
-				$newName = md5(uniqid(mt_rand(), true)).$strFileExt;
-			}
-
-			//check for double extension vulnerability
-			$newName = RemoveScriptExtension($newName);
-			$dir_add = $dirAdd;
-
-			if (empty($dir_add))
-			{
-				while (true)
-				{
-					$dir_add = md5(mt_rand());
-					$dir_add = substr($dir_add, 0, 3)."/".$dir_add;
-
-					$subDir = trim($strSavePath, "/")."/".$dir_add;
-					$filePath = "/".$subDir."/".$newName;
-
-					if (!$bucket->FileExists($filePath))
-						break;
-				}
-			}
-			else
-			{
-				$subDir = trim($strSavePath, "/")."/".$dir_add;
-				$filePath = "/".$subDir."/".$newName;
-			}
-
-			$targetPath = $bucket->GetFileSRC("/");
-			if (strpos($arFile["tmp_name"], $targetPath) === 0)
-			{
-				$arDbFile = array(
-					"SUBDIR" => "",
-					"FILE_NAME" => substr($arFile["tmp_name"], strlen($targetPath)),
-					"CONTENT_TYPE" => $arFile["type"],
-				);
-				$copyPath = $bucket->FileCopy($arDbFile, $filePath);
-				if (!$copyPath)
-					return false;
-
-				$copySize = $bucket->GetFileSize("/".urldecode(substr($copyPath, strlen($targetPath))));
-			}
-			else
-			{
-				$imgArray = CFile::GetImageSize($arFile["tmp_name"], true, false);
-				if (is_array($imgArray) && $imgArray[2] == IMAGETYPE_JPEG)
-				{
-					$exifData = CFile::ExtractImageExif($arFile["tmp_name"]);
-					if ($exifData && isset($exifData['Orientation']))
-					{
-						$properlyOriented = CFile::ImageHandleOrientation($exifData['Orientation'], $arFile["tmp_name"]);
-						if ($properlyOriented)
-						{
-							$jpgQuality = intval(COption::GetOptionString('main', 'image_resize_quality', '95'));
-							if ($jpgQuality <= 0 || $jpgQuality > 100)
-								$jpgQuality = 95;
-
-							imagejpeg($properlyOriented, $arFile["tmp_name"], $jpgQuality);
-							clearstatcache(true, $arFile["tmp_name"]);
-						}
-						$arFile['size'] = filesize($arFile["tmp_name"]);
-					}
-				}
-
-				if (!$bucket->SaveFile($filePath, $arFile))
-					return false;
-			}
-		}
-
-		$arFile["HANDLER_ID"] = $bucket->ID;
-		$arFile["SUBDIR"] = $subDir;
-		$arFile["FILE_NAME"] = $newName;
-		$arFile["WIDTH"] = 0;
-		$arFile["HEIGHT"] = 0;
-
-		if (array_key_exists("bucket", $arFile))
-		{
-			$arFile["WIDTH"] = $arFile["width"];
-			$arFile["HEIGHT"] = $arFile["height"];
-			$arFile["size"] = $arFile["file_size"];
-		}
-		elseif ($copySize !== false)
-		{
-			$arFile["WIDTH"] = $arFile["width"];
-			$arFile["HEIGHT"] = $arFile["height"];
-			$arFile["size"] = $copySize;
-			$bucket->IncFileCounter($copySize);
-		}
-		else
-		{
-			$bucket->IncFileCounter(filesize($arFile["tmp_name"]));
-			$flashEnabled = !CFile::IsImage($arFile["ORIGINAL_NAME"], $arFile["type"]);
-			$imgArray = CFile::GetImageSize($arFile["tmp_name"], true, $flashEnabled);
-			if (is_array($imgArray))
-			{
-				$arFile["WIDTH"] = $imgArray[0];
-				$arFile["HEIGHT"] = $imgArray[1];
-			}
-		}
-
-		if (isset($arFile["old_file"]))
-			CFile::DoDelete($arFile["old_file"]);
-
-	return true;
-}*/
-
 
 
 
